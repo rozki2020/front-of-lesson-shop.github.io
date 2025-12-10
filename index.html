@@ -3,23 +3,165 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Kirill's Project</title>
+    <title>After School Classes</title>
     <link rel="stylesheet" href="stylesheet.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css"
+    />
     <script src="https://cdn.jsdelivr.net/npm/vue@2.7.16/dist/vue.js"></script>
   </head>
   <body>
     <div id="app">
-      <h1>Hello Vue!</h1>
+      <header>
+        <h1>{{ sitename }}</h1>
+        <div class="search-bar">
+          <input
+            type="text"
+            v-model="searchQuery"
+            placeholder="Search lessons..."
+          />
+        </div>
+        <button
+          v-on:click="showCheckout"
+          v-if="cartItemCount > 0 || !showProduct"
+        >
+          {{ showProduct ? 'Cart (' + cartItemCount + ')' : 'Back to Lessons' }}
+          <span class="fas fa-cart-plus"></span>
+        </button>
+        <button disabled v-else>
+          Cart
+          <span class="fas fa-cart-plus"></span>
+        </button>
+      </header>
+
+      <main>
+        <div v-if="showProduct">
+          <div class="controls">
+            <div class="sort-controls">
+              <div class="filter-section">
+                <h3>Sort By</h3>
+                <div
+                  v-for="(value, key) in sortOptions"
+                  :key="key"
+                  class="radio-group"
+                >
+                  <input
+                    type="radio"
+                    :id="key"
+                    :value="value"
+                    v-model="sortBy"
+                  />
+                  <label :for="key">{{ key }}</label>
+                </div>
+              </div>
+
+              <div class="filter-section">
+                <h3>Order</h3>
+                <div class="radio-group">
+                  <input
+                    type="radio"
+                    id="asc"
+                    value="asc"
+                    v-model="sortOrder"
+                  />
+                  <label for="asc">Ascending</label>
+                </div>
+                <div class="radio-group">
+                  <input
+                    type="radio"
+                    id="desc"
+                    value="desc"
+                    v-model="sortOrder"
+                  />
+                  <label for="desc">Descending</label>
+                </div>
+              </div>
+
+              <div class="filter-section">
+                <h3>Max Price: £{{ maxPrice }}</h3>
+                <input
+                  type="range"
+                  v-model.number="maxPrice"
+                  min="0"
+                  max="200"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div class="product-list">
+            <div class="product" v-for="lesson in sortedLessons">
+              <figure>
+                <i :class="lesson.image"></i>
+              </figure>
+              <div class="info">
+                <h2>{{ lesson.subject }}</h2>
+                <p>Location: {{ lesson.location }}</p>
+                <p>Price: £{{ lesson.price }}</p>
+                <p>Spaces: {{ lesson.spaces }}</p>
+                <button
+                  v-on:click="addToCart(lesson)"
+                  v-if="canAddToCart(lesson)"
+                >
+                  Add to cart
+                </button>
+                <button disabled v-else>Sold out</button>
+                <span v-if="lesson.spaces === 0">All out!</span>
+                <span v-else-if="lesson.spaces < 5"
+                  >Only {{ lesson.spaces }} left!</span
+                >
+                <span v-else>Buy now!</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div v-else class="checkout-page">
+          <h2>Shopping Cart</h2>
+          <div class="cart-items">
+            <div class="cart-item" v-for="item in cartItems">
+              <div class="item-details">
+                <h3>{{ item.subject }}</h3>
+                <p>Location: {{ item.location }}</p>
+                <p>Price: £{{ item.price }}</p>
+              </div>
+              <div class="item-actions">
+                <button v-on:click="removeFromCart(item.id)">Remove</button>
+              </div>
+            </div>
+            <div class="cart-total" v-if="cart.length > 0">
+              <h3>Total: £{{ cartTotal }}</h3>
+            </div>
+            <div v-else>
+              <p>Your cart is empty.</p>
+            </div>
+          </div>
+
+          <div class="checkout-form" v-if="cart.length > 0">
+            <h2>Checkout</h2>
+            <p>
+              <strong>First Name:</strong>
+              <input v-model.trim="order.firstName" />
+            </p>
+            <p>
+              <strong>Last Name:</strong>
+              <input v-model.trim="order.lastName" />
+            </p>
+            <p>
+              <strong>Phone:</strong>
+              <input v-model.number="order.phone" type="number" />
+            </p>
+
+            <button v-on:click="submitForm" v-if="isFormValid">
+              Place Order
+            </button>
+            <button disabled v-else>Place Order</button>
+          </div>
+        </div>
+      </main>
     </div>
 
     <script src="vue.js"></script>
-    <script>
-      new Vue({
-        el: "#app",
-        data: {
-          message: "Hello Vue!",
-        },
-      });
-    </script>
   </body>
 </html>

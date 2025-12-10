@@ -1,0 +1,203 @@
+:root {
+  --primary-color: #4a90e2;
+  --secondary-color: #f5f6fa;
+  --text-color: #2c3e50;
+  --accent-color: #e74c3c;
+  --success-color: #2ecc71;
+  --card-bg: #ffffff;
+  --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --radius: 12px;
+}
+
+body {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background-color: var(--secondary-color);
+  color: var(--text-color);
+  margin: 0;
+  padding: 0;
+}
+
+#app {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  background-color: var(--card-bg);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  margin-bottom: 30px;
+}
+
+header h1 {
+  margin: 0;
+  color: var(--primary-color);
+}
+
+.search-bar input {
+  padding: 10px 15px;
+  border: 2px solid #eee;
+  border-radius: 25px;
+  width: 300px;
+  font-size: 16px;
+  transition: border-color 0.3s;
+}
+
+.search-bar input:focus {
+  border-color: var(--primary-color);
+  outline: none;
+}
+
+button {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 25px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: transform 0.2s, background-color 0.2s;
+}
+
+button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  background-color: #357abd;
+}
+
+button:disabled {
+  background-color: #bdc3c7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.controls {
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.sort-controls {
+  background: var(--card-bg);
+  padding: 20px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  display: flex;
+  gap: 30px;
+  flex-wrap: wrap;
+}
+
+.filter-section h3 {
+  margin: 0 0 10px 0;
+  font-size: 1.1em;
+  color: var(--primary-color);
+}
+
+.radio-group {
+  margin-bottom: 5px;
+}
+
+.radio-group label {
+  margin-left: 5px;
+  cursor: pointer;
+}
+
+input[type="range"] {
+  width: 100%;
+}
+
+.sort-controls select {
+  padding: 8px;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+}
+
+.product-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 25px;
+}
+
+.product {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: var(--shadow);
+  transition: transform 0.3s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.product:hover {
+  transform: translateY(-5px);
+}
+
+.product figure {
+  margin: 0 0 15px 0;
+  font-size: 4em;
+  color: var(--primary-color);
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.product h2 {
+  margin: 10px 0;
+  font-size: 1.5em;
+}
+
+.product p {
+  margin: 5px 0;
+  color: #666;
+}
+
+.product button {
+  margin-top: 15px;
+  width: 100%;
+}
+
+.checkout-page {
+  background: var(--card-bg);
+  padding: 30px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.cart-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+  border-bottom: 1px solid #eee;
+}
+
+.cart-total {
+  margin-top: 20px;
+  text-align: right;
+  font-size: 1.2em;
+  color: var(--primary-color);
+}
+
+.checkout-form {
+  margin-top: 40px;
+  max-width: 500px;
+}
+
+.checkout-form input {
+  width: 100%;
+  padding: 10px;
+  margin-top: 5px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+.checkout-form p {
+  margin-bottom: 15px;
+}
