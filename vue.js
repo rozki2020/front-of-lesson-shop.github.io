@@ -3,140 +3,124 @@ var app = new Vue({
   data: {
     sitename: "After School Classes",
     showProduct: true,
+    orderSubmitted: false,
     order: {
       firstName: "",
       lastName: "",
       address: "",
       city: "",
       zip: "",
-      state: "",
       method: "Home",
       gift: false,
       sendGift: "Send as a gift",
       dontSendGift: "Do not send as a gift",
     },
-    states: {
-      AL: "Alabama",
-      AR: "Arizona",
-      CA: "California",
-      NV: "Nevada",
-    },
-    lessons: [
-      {
-        id: 1001,
-        subject: "Math",
-        location: "London",
-        price: 100,
-        spaces: 5,
-        image: "fas fa-calculator",
-      },
-      {
-        id: 1002,
-        subject: "English",
-        location: "Oxford",
-        price: 120,
-        spaces: 5,
-        image: "fas fa-book",
-      },
-      {
-        id: 1003,
-        subject: "Science",
-        location: "Cambridge",
-        price: 90,
-        spaces: 5,
-        image: "fas fa-flask",
-      },
-      {
-        id: 1004,
-        subject: "History",
-        location: "York",
-        price: 80,
-        spaces: 5,
-        image: "fas fa-landmark",
-      },
-      {
-        id: 1005,
-        subject: "Music",
-        location: "Bristol",
-        price: 150,
-        spaces: 5,
-        image: "fas fa-music",
-      },
-      {
-        id: 1006,
-        subject: "Art",
-        location: "Manchester",
-        price: 110,
-        spaces: 5,
-        image: "fas fa-palette",
-      },
-      {
-        id: 1007,
-        subject: "PE",
-        location: "Liverpool",
-        price: 70,
-        spaces: 5,
-        image: "fas fa-running",
-      },
-      {
-        id: 1008,
-        subject: "Geography",
-        location: "Leeds",
-        price: 85,
-        spaces: 5,
-        image: "fas fa-globe-europe",
-      },
-      {
-        id: 1009,
-        subject: "Coding",
-        location: "London",
-        price: 200,
-        spaces: 5,
-        image: "fas fa-laptop-code",
-      },
-      {
-        id: 1010,
-        subject: "Drama",
-        location: "Oxford",
-        price: 130,
-        spaces: 5,
-        image: "fas fa-theater-masks",
-      },
-    ],
+
+    lessons: [],
     cart: [],
     sortBy: "subject",
     sortOrder: "asc",
     searchQuery: "",
     maxPrice: 200,
     sortOptions: {
-      Subject: "subject",
-      Location: "location",
+      Subject: "name",
+      Location: "place",
       Price: "price",
-      Spaces: "spaces",
+      Spaces: "spacesLeft",
+    },
+  },
+  created: function () {
+    this.fetchActivities();
+  },
+  watch: {
+    searchQuery: {
+      handler(val) {
+        this.searchActivities(val);
+      },
     },
   },
   methods: {
+    fetchActivities() {
+      fetch("http://localhost:3000/collection/activities")
+        .then((response) => response.json())
+        .then((json) => {
+          this.setLessons(json);
+        });
+    },
+    setLessons(lessons) {
+      this.cart.forEach((_id) => {
+        const lesson = lessons.find((l) => l._id === _id);
+        if (lesson) {
+          lesson.spacesLeft--;
+        }
+      });
+      this.lessons = lessons;
+    },
+    searchActivities(query) {
+      const url = query
+        ? `http://localhost:3000/collection/activities/search?q=${query}`
+        : "http://localhost:3000/collection/activities";
+
+      fetch(url)
+        .then((response) => response.json())
+        .then((json) => {
+          this.setLessons(json);
+        });
+    },
+    saveOrder(order) {
+      fetch("http://localhost:3000/collection/orders/order", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(order),
+      })
+        .then((response) => response.json())
+        .then((json) => {
+          // alert("Order submitted!");
+          this.cart = [];
+          this.orderSubmitted = true;
+          // this.showProduct = true;
+        })
+        .catch((error) => {
+          console.error("Error submitting order:", error);
+          alert("Failed to submit order");
+        });
+    },
+    updateLessonSpaces(_id, spacesLeft) {
+      fetch(`http://localhost:3000/collection/activities/${_id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ spacesLeft: spacesLeft }),
+      });
+    },
     addToCart(lesson) {
-      this.cart.push(lesson.id);
-      lesson.spaces--;
+      this.cart.push(lesson._id);
+      lesson.spacesLeft--;
+      this.updateLessonSpaces(lesson._id, 1);
     },
     showCheckout() {
       this.showProduct = this.showProduct ? false : true;
+      if (!this.showProduct) {
+        this.fetchActivities();
+      }
     },
     submitForm() {
-      alert("Order submitted!");
-      // Reset logic could go here
-      this.cart = [];
-      this.showProduct = true;
-      this.lessons.forEach((lesson) => (lesson.spaces = 5)); // Reset spaces for demo
+      const order = {
+        ...this.order,
+        lessonIDs: this.cart,
+      };
+      this.saveOrder(order);
     },
     canAddToCart(lesson) {
-      return lesson.spaces > 0;
+      return lesson.spacesLeft > 0;
     },
-    cartCount(id) {
+    cartCount(_id) {
       let count = 0;
       for (let i = 0; i < this.cart.length; i++) {
-        if (this.cart[i] === id) {
+        if (this.cart[i] === _id) {
           count++;
         }
       }
@@ -147,14 +131,19 @@ var app = new Vue({
       if (index > -1) {
         this.cart.splice(index, 1);
         // Find lesson and increment spaces
-        const lesson = this.lessons.find((l) => l.id === lessonId);
+        const lesson = this.lessons.find((l) => l._id === lessonId);
         if (lesson) {
-          lesson.spaces++;
+          lesson.spacesLeft++;
+          this.updateLessonSpaces(lesson._id, -1);
         }
       }
     },
-    getLessonById(id) {
-      return this.lessons.find((l) => l.id === id);
+    getLessonById(_id) {
+      return this.lessons.find((l) => l._id === _id);
+    },
+    returnToStore() {
+      this.orderSubmitted = false;
+      this.showProduct = true;
     },
   },
   computed: {
@@ -164,17 +153,6 @@ var app = new Vue({
     sortedLessons() {
       let lessonsArray = this.lessons.slice(0);
 
-      // Filter by search
-      if (this.searchQuery) {
-        const lowerSearch = this.searchQuery.toLowerCase();
-        lessonsArray = lessonsArray.filter(
-          (lesson) =>
-            lesson.subject.toLowerCase().includes(lowerSearch) ||
-            lesson.location.toLowerCase().includes(lowerSearch)
-        );
-      }
-
-      // Filter by price
       if (this.maxPrice > 0) {
         lessonsArray = lessonsArray.filter(
           (lesson) => lesson.price <= this.maxPrice
@@ -196,26 +174,33 @@ var app = new Vue({
     cartItems() {
       // Return unique items in cart with their counts
       const counts = {};
-      this.cart.forEach((id) => {
-        counts[id] = (counts[id] || 0) + 1;
+      this.cart.forEach((_id) => {
+        counts[_id] = (counts[_id] || 0) + 1;
       });
 
-      return Object.keys(counts).map((id) => {
-        const lesson = this.lessons.find((l) => l.id == id);
+      return Object.keys(counts).map((_id) => {
+        const lesson = this.lessons.find((l) => l._id == _id);
         return {
           ...lesson,
-          count: counts[id],
+          count: counts[_id],
         };
       });
     },
     cartTotal() {
-      return this.cart.reduce((total, id) => {
-        const lesson = this.lessons.find((l) => l.id == id);
+      return this.cart.reduce((total, _id) => {
+        const lesson = this.lessons.find((l) => l._id == _id);
         return total + (lesson ? lesson.price : 0);
       }, 0);
     },
     isFormValid() {
-      return this.order.firstName && this.order.lastName && this.order.phone;
+      return (
+        this.order.firstName &&
+        this.order.lastName &&
+        this.order.phone &&
+        this.order.address &&
+        this.order.city &&
+        this.order.zip
+      );
     },
   },
 });

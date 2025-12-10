@@ -96,10 +96,10 @@
                 <i :class="lesson.image"></i>
               </figure>
               <div class="info">
-                <h2>{{ lesson.subject }}</h2>
-                <p>Location: {{ lesson.location }}</p>
+                <h2>{{ lesson.name}}</h2>
+                <p>Location: {{ lesson.place }}</p>
                 <p>Price: £{{ lesson.price }}</p>
-                <p>Spaces: {{ lesson.spaces }}</p>
+                <p>Spaces: {{ lesson.spacesLeft }}</p>
                 <button
                   v-on:click="addToCart(lesson)"
                   v-if="canAddToCart(lesson)"
@@ -118,45 +118,64 @@
         </div>
 
         <div v-else class="checkout-page">
-          <h2>Shopping Cart</h2>
-          <div class="cart-items">
-            <div class="cart-item" v-for="item in cartItems">
-              <div class="item-details">
-                <h3>{{ item.subject }}</h3>
-                <p>Location: {{ item.location }}</p>
-                <p>Price: £{{ item.price }}</p>
-              </div>
-              <div class="item-actions">
-                <button v-on:click="removeFromCart(item.id)">Remove</button>
-              </div>
-            </div>
-            <div class="cart-total" v-if="cart.length > 0">
-              <h3>Total: £{{ cartTotal }}</h3>
-            </div>
-            <div v-else>
-              <p>Your cart is empty.</p>
-            </div>
+          <div v-if="orderSubmitted">
+            <h2>Order Submitted!</h2>
+            <p>Thank you for your purchase.</p>
+            <button v-on:click="returnToStore">Return to Store</button>
           </div>
+          <div v-else>
+            <h2>Shopping Cart</h2>
+            <div class="cart-items">
+              <div class="cart-item" v-for="item in cartItems">
+                <div class="item-details">
+                  <h3>{{ item.name }}</h3>
+                  <p>Location: {{ item.place }}</p>
+                  <p>Price: £{{ item.price }}</p>
+                </div>
+                <div class="item-actions">
+                  <button v-on:click="removeFromCart(item._id)">Remove</button>
+                </div>
+              </div>
+              <div class="cart-total" v-if="cart.length > 0">
+                <h3>Total: £{{ cartTotal }}</h3>
+              </div>
+              <div v-else>
+                <p>Your cart is empty.</p>
+              </div>
+            </div>
 
-          <div class="checkout-form" v-if="cart.length > 0">
-            <h2>Checkout</h2>
-            <p>
-              <strong>First Name:</strong>
-              <input v-model.trim="order.firstName" />
-            </p>
-            <p>
-              <strong>Last Name:</strong>
-              <input v-model.trim="order.lastName" />
-            </p>
-            <p>
-              <strong>Phone:</strong>
-              <input v-model.number="order.phone" type="number" />
-            </p>
+            <div class="checkout-form" v-if="cart.length > 0">
+              <h2>Checkout</h2>
+              <p>
+                <strong>First Name:</strong>
+                <input v-model.trim="order.firstName" />
+              </p>
+              <p>
+                <strong>Last Name:</strong>
+                <input v-model.trim="order.lastName" />
+              </p>
+              <p>
+                <strong>Phone:</strong>
+                <input v-model.number="order.phone" type="number" />
+              </p>
+              <p>
+                <strong>Address:</strong>
+                <input v-model.trim="order.address" />
+              </p>
+              <p>
+                <strong>City:</strong>
+                <input v-model.trim="order.city" />
+              </p>
+              <p>
+                <strong>Zip/Postal Code:</strong>
+                <input v-model.number="order.zip" type="number" />
+              </p>
 
-            <button v-on:click="submitForm" v-if="isFormValid">
-              Place Order
-            </button>
-            <button disabled v-else>Place Order</button>
+              <button v-on:click="submitForm" v-if="isFormValid">
+                Place Order
+              </button>
+              <button disabled v-else>Place Order</button>
+            </div>
           </div>
         </div>
       </main>
